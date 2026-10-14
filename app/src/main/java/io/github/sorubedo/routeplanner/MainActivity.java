@@ -139,7 +139,7 @@ public final class MainActivity extends Activity {
                 @Override public void onAuthSuccess() { Log.i("RoutePlannerMap", "Tencent map authorization succeeded"); }
                 @Override public void onAuthFail(int code, String error) {
                     Log.e("RoutePlannerMap", "Tencent map authorization failed: " + code);
-                    runOnUiThread(() -> hint.setText("腾讯地图鉴权失败（" + code + "），请在地图设置中核对 Key、包名与签名"));
+                    runOnUiThread(() -> hint.setText("腾讯地图鉴权失败（" + code + "），请在地图设置中核对 Key、包名与服务权限"));
                 }
             }).setOnMapLoadedCallback(() -> {
                 Log.i("RoutePlannerMap", "Tencent base map loaded");
