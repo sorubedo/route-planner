@@ -1,0 +1,81 @@
+name: Release Android APK
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify release version
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re
+          build = pathlib.Path('app/build.gradle.kts').read_text()
+          version = re.search(r'versionName = "([^"]+)"', build).group(1)
+          assert os.environ['GITHUB_REF_NAME'] == 'v' + version, 'Tag and versionName must match'
+          PY
+      - name: Restore signing files
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, pathlib
+          names = ['ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD']
+          assert all(os.environ.get(name) for name in names), 'Release signing secrets are missing'
+          directory = pathlib.Path(os.environ['RUNNER_TEMP']) / 'route-signing'
+          directory.mkdir(mode=0o700)
+          store = directory / 'release.jks'
+          store.write_bytes(base64.b64decode(os.environ['ANDROID_KEYSTORE_BASE64'], validate=True))
+          def escape(value):
+              return value.replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r')
+          props = directory / 'signing.properties'
+          props.write_text('\n'.join(f'{key}={escape(value)}' for key, value in {
+              'storeFile': str(store), 'storePassword': os.environ['ANDROID_KEYSTORE_PASSWORD'],
+              'keyAlias': os.environ['ANDROID_KEY_ALIAS'], 'keyPassword': os.environ['ANDROID_KEY_PASSWORD']
+          }.items()) + '\n')
+          store.chmod(0o600)
+          props.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'ROUTE_SIGNING_PROPERTIES={props}\n')
+          PY
+      - run: node --test app/tests/*.test.cjs
+      - run: ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease --console=plain
+      - name: Verify and package APK
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/release/app-release.apk "artifacts/route-planner-${GITHUB_REF_NAME}.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "artifacts/route-planner-${GITHUB_REF_NAME}.apk" > artifacts/signing-certificate.txt
+          python3 scripts/check-public-files.py "artifacts/route-planner-${GITHUB_REF_NAME}.apk"
+          cd artifacts
+          sha256sum *.apk > SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: 路线规划 ${{ github.ref_name }}
+          body: |
+            Android 路线规划工具，支持自动闭环、手动插点、普通/卫星地图、沿线预览和 JSON 导入导出。
+
+            安装后请在「地图设置」填写自己的腾讯地图 Android SDK Key，并按设置页显示的包名和签名 SHA-1 配置授权。
+          files: |
+            artifacts/*.apk
+            artifacts/SHA256SUMS
+            artifacts/signing-certificate.txt
+          fail_on_unmatched_files: true
+      - name: Remove signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/route-signing"

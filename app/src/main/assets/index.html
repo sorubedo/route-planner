@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'; script-src 'self';">
+  <title>路线规划</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div><span class="eyebrow">ANDROID</span><h1>路线规划</h1></div><button id="mapSettings">地图设置</button><button id="help" aria-label="使用说明">说明</button></header>
+  <div id="map"><div id="mapHint">点击地图绘制区域或插入打卡点</div></div>
+  <main>
+    <div class="mode-switch"><label><input id="modeManual" name="planningMode" type="radio">手动插点</label><label><input id="modeAuto" name="planningMode" type="radio" checked>自动规划</label></div>
+    <div class="toggles"><label><input id="satellite" type="checkbox">卫星图</label><label class="auto-only"><input id="roads" type="checkbox" checked>优先步行道路</label><label class="auto-only"><input id="ordered" type="checkbox">按顺序打卡</label></div>
+    <div class="tools"><button id="area" class="auto-only">划分区域</button><button id="finishArea" class="auto-only" disabled>完成区域</button><button id="point">插入打卡点</button><button id="undo">撤销</button></div>
+    <div class="settings"><label class="auto-only">期望单圈 <input id="meters" type="number" min="100" max="5000" value="1000"> 米</label><button id="jump">坐标跳转</button><button id="demo">示例</button></div>
+    <div id="items"></div>
+    <button id="plan" class="primary">随机起点 · 生成闭合路线</button>
+    <div id="status" role="status">示例区域用于演示，可删除后绘制自己的区域。</div>
+    <div id="result" hidden><div class="metrics"><span id="routeMode"></span><strong id="routeLength"></strong><span id="visitCount"></span></div><p id="warnings"></p><div class="tools"><button id="play">沿路线预览</button><button id="export">复制规划 JSON</button></div></div>
+    <div class="tools footer"><button id="import">导入区域 / 打卡点</button><button id="clear">清空</button></div>
+    <p class="note" id="note">可离线编辑与几何规划。蓝色为道路规划，橙色为几何回退；自动模式优先减少本圈重复路段；腾讯步行路线逐段规划；每轮最多 20 秒，最多三轮，失败段单独回退，实际通行条件需核对。</p>
+  <p class="note">地图与步行路线由腾讯地图提供；橙色段为本地几何回退。</p>
+  </main>
+  <dialog id="dialog"><h2 id="dialogTitle"></h2><p id="dialogHelp"></p><textarea id="dialogInput" spellcheck="false"></textarea><div class="tools"><button id="dialogCancel">取消</button><button id="dialogOk" class="primary">确定</button></div></dialog>
+  <script src="planner.js"></script><script src="road-client.js"></script><script src="map-ui.js"></script><script src="ui.js"></script>
+</body>
+</html>
