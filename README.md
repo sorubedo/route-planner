@@ -16,7 +16,7 @@
 
 1. 从 Releases 下载并安装 APK。
 2. 打开「地图设置」，复制包名与签名信息。
-3. 在[腾讯位置服务控制台](https://lbs.qq.com/dev/console/application/mine)创建自己的 Key，启用 Android 地图 SDK，并填写应用的包名与签名 SHA-1；确认步行路线服务可用。
+3. 在[腾讯位置服务控制台](https://lbs.qq.com/dev/console/application/mine)创建自己的 Key，勾选「地图 SDK」并填写应用包名，同时勾选「WebService API」以使用步行路线服务。可参考[官方申请说明](https://lbs.qq.com/mobile/androidMapSDK/developerGuide/getKey)。
 4. 将 Key 填入应用并保存，同意地图服务说明后即可使用。
 5. 划分区域、插入打卡点，设置长度后点击「生成闭合路线」；也可切换为手动插点。
 

@@ -45,7 +45,7 @@ public final class MapKeyActivity extends Activity {
             return insets;
         });
         text(root, "腾讯地图设置", 24);
-        text(root, "填写你自己的腾讯位置服务 Android SDK Key，用于地图与步行路线。请在腾讯位置服务控制台为该 Key 开启 Android 地图 SDK 权限，填写下方包名和当前安装包的签名 SHA-1，并确认步行路线服务可用。", 15);
+        text(root, "填写你自己的腾讯位置服务 Key，用于地图与步行路线。在腾讯位置服务控制台勾选“地图 SDK”，配置下方包名，并勾选“WebService API”以使用步行规划。签名 SHA-1 可供核对安装包身份。", 15);
         String registration = "包名：" + getPackageName() + "\n签名 SHA-1：" + certificateSha1();
         text(root, registration, 14);
         button(root, "复制授权信息").setOnClickListener(v -> {
