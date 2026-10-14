@@ -10,6 +10,12 @@
 - 数据管理：保存编辑内容，支持导入、导出路线 JSON。
 - 自定义腾讯地图 Key：在应用内填写、修改或清除自己的 Key。
 
+## 软件截图
+
+| 自动规划 | 手动路线 | 地图设置 |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/automatic-route.png" width="240" alt="自动生成闭合步行路线"> | <img src="docs/screenshots/manual-route.png" width="240" alt="手动插点绘制路线"> | <img src="docs/screenshots/map-settings.png" width="240" alt="自定义腾讯地图 Key 设置"> |
+
 ## 开始使用
 
 需要 Android 8.0 或更高版本。
